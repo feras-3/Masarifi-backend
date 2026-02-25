@@ -1,0 +1,8 @@
+com\expensetracker\service\BudgetServiceTest.class
+com\expensetracker\controller\PlaidControllerTest.class
+com\expensetracker\controller\TransactionControllerTest.class
+com\expensetracker\security\AuthenticationPropertyTest.class
+com\expensetracker\service\TransactionBudgetIntegrationTest.class
+com\expensetracker\security\AuthenticationPropertyTest$EndpointConfig.class
+com\expensetracker\controller\AlertControllerTest.class
+com\expensetracker\controller\BudgetControllerTest.class

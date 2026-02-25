@@ -25,9 +25,11 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/plaid/webhook").permitAll()
                 .requestMatchers("/api/transactions/**").authenticated()
                 .requestMatchers("/api/budgets/**").authenticated()
                 .requestMatchers("/api/alerts/**").authenticated()
+                .requestMatchers("/api/plaid/**").authenticated()
                 .anyRequest().permitAll()
             )
             .sessionManagement(session -> session

@@ -37,4 +37,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate
     );
+    
+    java.util.Optional<Transaction> findByPlaidTransactionId(String plaidTransactionId);
 }

@@ -25,6 +25,9 @@ public class TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
     
+    @Autowired
+    private BudgetService budgetService;
+    
     @Transactional
     public Transaction createTransaction(String userId, @Valid TransactionRequest request) {
         validateCategory(request.getCategory());
@@ -37,7 +40,16 @@ public class TransactionService {
             request.getCategory()
         );
         
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        
+        // Trigger budget recalculation and alert checking
+        try {
+            budgetService.recalculateBalance(userId);
+        } catch (NoSuchElementException e) {
+            // No budget exists yet, that's okay
+        }
+        
+        return saved;
     }
     
     public List<Transaction> getAllTransactions(String userId) {
@@ -61,7 +73,16 @@ public class TransactionService {
         transaction.setDescription(request.getDescription());
         transaction.setCategory(request.getCategory());
         
-        return transactionRepository.save(transaction);
+        Transaction updated = transactionRepository.save(transaction);
+        
+        // Trigger budget recalculation and alert checking
+        try {
+            budgetService.recalculateBalance(userId);
+        } catch (NoSuchElementException e) {
+            // No budget exists yet, that's okay
+        }
+        
+        return updated;
     }
     
     @Transactional
@@ -75,6 +96,13 @@ public class TransactionService {
         }
         
         transactionRepository.delete(transaction);
+        
+        // Trigger budget recalculation and alert checking
+        try {
+            budgetService.recalculateBalance(userId);
+        } catch (NoSuchElementException e) {
+            // No budget exists yet, that's okay
+        }
     }
     
     public Map<String, BigDecimal> getTotalsByCategory(String userId, LocalDate startDate, LocalDate endDate) {

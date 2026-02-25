@@ -27,6 +27,9 @@ public class BudgetService {
     @Autowired
     private TransactionRepository transactionRepository;
     
+    @Autowired
+    private AlertService alertService;
+    
     @Transactional
     public Budget createBudget(String userId, @Valid BudgetRequest request) {
         Budget budget = new Budget(userId, request.getAmount(), request.getPeriod());
@@ -92,11 +95,21 @@ public class BudgetService {
     @Transactional
     public void recalculateBalance(String userId) {
         // This method is called after transaction changes to trigger any necessary updates
-        // The actual balance calculation is done on-demand in getBudgetStatus
-        // This method can be used to trigger alerts or other side effects in the future
+        Budget budget = getCurrentBudget(userId);
         
-        // For now, we just verify the budget exists
-        getCurrentBudget(userId);
+        // Parse the period to get start and end dates
+        LocalDate[] periodDates = parsePeriod(budget.getPeriod());
+        LocalDate startDate = periodDates[0];
+        LocalDate endDate = periodDates[1];
+        
+        // Calculate spent amount
+        BigDecimal spent = transactionRepository.getTotalSpending(userId, startDate, endDate);
+        if (spent == null) {
+            spent = BigDecimal.ZERO;
+        }
+        
+        // Check budget thresholds and generate alerts if needed
+        alertService.checkBudgetThresholds(userId, spent, budget.getAmount(), budget.getPeriod());
     }
     
     /**
