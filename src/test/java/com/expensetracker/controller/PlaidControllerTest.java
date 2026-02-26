@@ -37,16 +37,21 @@ public class PlaidControllerTest {
     private PlaidService plaidService;
     
     @Test
-    @WithMockUser(username = "testuser")
-    public void testCreateLinkToken() throws Exception {
-        String linkToken = "link-sandbox-test-token";
+    public void testCreatePublicToken() throws Exception {
+        String publicToken = "public-sandbox-test-token";
+        String institutionId = "ins_109508";
         
-        when(plaidService.createLinkToken("testuser"))
-            .thenReturn(linkToken);
+        when(plaidService.createPublicToken(eq(institutionId)))
+            .thenReturn(publicToken);
         
-        mockMvc.perform(post("/api/plaid/link-token"))
+        Map<String, String> request = new HashMap<>();
+        request.put("institutionId", institutionId);
+        
+        mockMvc.perform(post("/api/plaid/public-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.linkToken").value(linkToken));
+            .andExpect(jsonPath("$.publicToken").value(publicToken));
     }
     
     @Test
@@ -130,8 +135,14 @@ public class PlaidControllerTest {
     }
     
     @Test
-    public void testCreateLinkTokenWithoutAuthentication() throws Exception {
-        mockMvc.perform(post("/api/plaid/link-token"))
-            .andExpect(status().isForbidden());
+    public void testCreatePublicTokenWithoutInstitutionId() throws Exception {
+        Map<String, String> request = new HashMap<>();
+        // Missing institutionId
+        
+        mockMvc.perform(post("/api/plaid/public-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("institutionId is required"));
     }
 }

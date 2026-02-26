@@ -9,15 +9,16 @@ import com.plaid.client.model.*;
 import com.plaid.client.request.PlaidApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import retrofit2.Response;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -48,30 +49,61 @@ public class PlaidService {
     @Value("${plaid.client.id}")
     private String clientId;
     
+    @Value("${plaid.secret}")
+    private String secret;
+    
+    @Value("${plaid.environment:sandbox}")
+    private String environment;
+    
     /**
-     * Create a link token for Plaid Link initialization
+     * Create a public token for linking a bank account
+     * Uses configured credentials from application.properties
      * Requirements: 13.1, 13.2
      */
-    public String createLinkToken(String userId) {
+    public String createPublicToken(String institutionId) {
         try {
-            LinkTokenCreateRequest request = new LinkTokenCreateRequest()
-                .user(new LinkTokenCreateRequestUser().clientUserId(userId))
-                .clientName("Expense Tracker")
-                .products(Arrays.asList(Products.TRANSACTIONS))
-                .countryCodes(Arrays.asList(CountryCode.US))
-                .language("en");
-            
-            Response<LinkTokenCreateResponse> response = plaidClient
-                .linkTokenCreate(request)
-                .execute();
-            
-            if (response.isSuccessful() && response.body() != null) {
-                return response.body().getLinkToken();
-            } else {
-                throw new RuntimeException("Failed to create link token: " + response.message());
+            // Determine Plaid API URL based on environment
+            String plaidUrl;
+            switch (environment.toLowerCase()) {
+                case "production":
+                    plaidUrl = "https://production.plaid.com";
+                    break;
+                case "development":
+                    plaidUrl = "https://development.plaid.com";
+                    break;
+                case "sandbox":
+                default:
+                    plaidUrl = "https://sandbox.plaid.com";
+                    break;
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Error creating link token", e);
+            
+            // Create request body with exact field names Plaid expects
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("client_id", clientId);
+            requestBody.put("secret", secret);
+            requestBody.put("institution_id", institutionId);
+            requestBody.put("initial_products", Arrays.asList("transactions"));
+            
+            // Make direct HTTP call to Plaid
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                plaidUrl + "/sandbox/public_token/create",
+                request,
+                Map.class
+            );
+            
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                return (String) response.getBody().get("public_token");
+            } else {
+                throw new RuntimeException("Failed to create public token: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating public token: " + e.getMessage(), e);
         }
     }
     

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.expensetracker.security.AuthenticationPropertyTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.171 s -- in com.expensetracker.security.AuthenticationPropertyTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.068 s -- in com.expensetracker.security.AuthenticationPropertyTest

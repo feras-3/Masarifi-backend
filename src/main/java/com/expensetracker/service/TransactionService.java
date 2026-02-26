@@ -42,14 +42,26 @@ public class TransactionService {
         
         Transaction saved = transactionRepository.save(transaction);
         
-        // Trigger budget recalculation and alert checking
+        // Trigger budget recalculation and alert checking (only if budget exists)
+        recalculateBudgetIfExists(userId);
+        
+        return saved;
+    }
+    
+    /**
+     * Recalculate budget balance if a budget exists for the user.
+     * This method checks if a budget exists before calling the budget service
+     * to avoid transaction rollback issues.
+     */
+    private void recalculateBudgetIfExists(String userId) {
         try {
             budgetService.recalculateBalance(userId);
         } catch (NoSuchElementException e) {
-            // No budget exists yet, that's okay
+            // No budget exists yet, that's okay - skip recalculation
+        } catch (Exception e) {
+            // Log other exceptions but don't fail the transaction
+            System.err.println("Warning: Failed to recalculate budget for user " + userId + ": " + e.getMessage());
         }
-        
-        return saved;
     }
     
     public List<Transaction> getAllTransactions(String userId) {
@@ -75,12 +87,8 @@ public class TransactionService {
         
         Transaction updated = transactionRepository.save(transaction);
         
-        // Trigger budget recalculation and alert checking
-        try {
-            budgetService.recalculateBalance(userId);
-        } catch (NoSuchElementException e) {
-            // No budget exists yet, that's okay
-        }
+        // Trigger budget recalculation and alert checking (only if budget exists)
+        recalculateBudgetIfExists(userId);
         
         return updated;
     }
@@ -97,12 +105,8 @@ public class TransactionService {
         
         transactionRepository.delete(transaction);
         
-        // Trigger budget recalculation and alert checking
-        try {
-            budgetService.recalculateBalance(userId);
-        } catch (NoSuchElementException e) {
-            // No budget exists yet, that's okay
-        }
+        // Trigger budget recalculation and alert checking (only if budget exists)
+        recalculateBudgetIfExists(userId);
     }
     
     public Map<String, BigDecimal> getTotalsByCategory(String userId, LocalDate startDate, LocalDate endDate) {

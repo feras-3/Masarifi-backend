@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.Map;
 
 @RestController
@@ -35,13 +37,24 @@ public class BudgetController {
     }
     
     /**
-     * GET /api/budgets/current - Get current budget status
+     * GET /api/budgets/current - Get all budgets for the authenticated user
      * Requirements: 1.4, 6.3, 9.1
      */
     @GetMapping("/current")
-    public ResponseEntity<BudgetStatus> getCurrentBudget() {
+    public ResponseEntity<List<BudgetStatus>> getAllBudgets() {
         String userId = getAuthenticatedUserId();
-        BudgetStatus budgetStatus = budgetService.getBudgetStatus(userId);
+        List<BudgetStatus> budgets = budgetService.getAllBudgets(userId);
+        return ResponseEntity.ok(budgets);
+    }
+    
+    /**
+     * GET /api/budgets/{id} - Get budget by ID
+     * Requirements: 1.4, 9.1
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<BudgetStatus> getBudgetById(@PathVariable String id) {
+        String userId = getAuthenticatedUserId();
+        BudgetStatus budgetStatus = budgetService.getBudgetById(id, userId);
         return ResponseEntity.ok(budgetStatus);
     }
     

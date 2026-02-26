@@ -6,28 +6,22 @@ Spring Boot backend for the Expense Tracker application.
 
 - Java 17 or higher
 - Maven 3.6+
-- PostgreSQL 12+
 
 ## Setup
 
-1. Install PostgreSQL and create a database:
-   ```sql
-   CREATE DATABASE expense_tracker;
-   ```
-
-2. Update database credentials in `src/main/resources/application.properties`
-
-3. Build the project:
+1. Build the project:
    ```bash
    mvn clean install
    ```
 
-4. Run the application:
+2. Run the application:
    ```bash
    mvn spring-boot:run
    ```
 
 The API will be available at `http://localhost:8080`
+
+The application uses SQLite as the database, which will automatically create an `expense_tracker.db` file in the project root directory on first run.
 
 ## Project Structure
 

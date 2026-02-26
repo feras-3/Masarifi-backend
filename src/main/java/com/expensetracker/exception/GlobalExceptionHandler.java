@@ -87,7 +87,11 @@ public class GlobalExceptionHandler {
         response.put("message", "An unexpected error occurred");
         
         // Log the full exception for debugging (not exposed to client)
+        System.err.println("=== INTERNAL SERVER ERROR ===");
+        System.err.println("Exception type: " + ex.getClass().getName());
+        System.err.println("Message: " + ex.getMessage());
         ex.printStackTrace();
+        System.err.println("=============================");
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }

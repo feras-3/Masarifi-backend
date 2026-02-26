@@ -24,16 +24,24 @@ public class PlaidController {
     private PlaidService plaidService;
     
     /**
-     * POST /api/plaid/link-token - Generate a link token for Plaid Link
+     * POST /api/plaid/public-token - Create a public token for linking a bank account
+     * Uses configured Plaid credentials from application.properties
      * Requirements: 13.1, 9.1
      */
-    @PostMapping("/link-token")
-    public ResponseEntity<Map<String, String>> createLinkToken() {
-        String userId = getAuthenticatedUserId();
-        String linkToken = plaidService.createLinkToken(userId);
+    @PostMapping("/public-token")
+    public ResponseEntity<Map<String, String>> createPublicToken(
+            @RequestBody Map<String, String> request) {
+        String institutionId = request.get("institution_id");
+        
+        if (institutionId == null) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "institutionId is required"));
+        }
+        
+        String publicToken = plaidService.createPublicToken(institutionId);
         
         Map<String, String> response = new HashMap<>();
-        response.put("linkToken", linkToken);
+        response.put("publicToken", publicToken);
         
         return ResponseEntity.ok(response);
     }
