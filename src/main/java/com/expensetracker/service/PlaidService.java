@@ -204,11 +204,20 @@ public class PlaidService {
 
             // Trigger budget recalculation if transactions were added
             if (newCount > 0) {
+                System.out.println("=== Triggering Budget Recalculation ===");
+                System.out.println("User ID: " + userId);
+                System.out.println("New Transactions: " + newCount);
                 try {
                     budgetService.recalculateBalance(userId);
+                    System.out.println("Budget recalculation completed successfully");
                 } catch (NoSuchElementException e) {
+                    System.out.println("No budget exists yet for user: " + userId);
                     // No budget exists yet, that's okay
+                } catch (Exception e) {
+                    System.err.println("Error during budget recalculation: " + e.getMessage());
+                    e.printStackTrace();
                 }
+                System.out.println("======================================");
             }
 
         } catch (Exception e) {
@@ -262,6 +271,12 @@ public class PlaidService {
                     ? plaidTx.getPersonalFinanceCategory().getPrimary()
                     : "Other";
             String appCategory = categoryMapper.mapPlaidCategory(plaidCategory);
+
+            System.out.println("=== Plaid Transaction Mapping ===");
+            System.out.println("Plaid Category: " + plaidCategory);
+            System.out.println("Mapped App Category: " + appCategory);
+            System.out.println("Transaction Amount: " + Math.abs(plaidTx.getAmount()));
+            System.out.println("================================");
 
             // Create transaction
             Transaction transaction = new Transaction();

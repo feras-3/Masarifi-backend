@@ -30,11 +30,12 @@ CREATE TABLE IF NOT EXISTS budgets (
     user_id TEXT NOT NULL,
     amount REAL NOT NULL,
     period TEXT NOT NULL,
+    category TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CHECK (amount > 0),
-    UNIQUE (user_id, period)
+    UNIQUE (user_id, period, category)
 );
 
 -- Alerts table
@@ -69,3 +70,4 @@ CREATE TABLE IF NOT EXISTS plaid_accounts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_active ON plaid_accounts(user_id, is_active);
+
