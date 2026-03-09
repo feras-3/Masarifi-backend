@@ -13,30 +13,36 @@ import java.util.Map;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
-    
-    List<Transaction> findByUserIdOrderByDateDesc(String userId);
-    
-    List<Transaction> findByUserIdAndCategory(String userId, String category);
-    
-    List<Transaction> findByUserIdAndDateBetween(String userId, LocalDate startDate, LocalDate endDate);
-    
-    @Query("SELECT t.category as category, SUM(t.amount) as total " +
-           "FROM Transaction t " +
-           "WHERE t.userId = :userId " +
-           "AND t.date BETWEEN :startDate AND :endDate " +
-           "GROUP BY t.category")
-    List<Map<String, Object>> getTotalsByCategory(
-        @Param("userId") String userId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
-    );
-    
-    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userId = :userId AND t.date BETWEEN :startDate AND :endDate")
-    BigDecimal getTotalSpending(
-        @Param("userId") String userId,
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
-    );
-    
-    java.util.Optional<Transaction> findByPlaidTransactionId(String plaidTransactionId);
+
+        List<Transaction> findByUserIdOrderByDateDesc(String userId);
+
+        @Query("SELECT t FROM Transaction t WHERE t.userId = :userId AND LOWER(t.category) = LOWER(:category)")
+        List<Transaction> findByUserIdAndCategory(@Param("userId") String userId, @Param("category") String category);
+
+        List<Transaction> findByUserIdAndDateBetween(String userId, LocalDate startDate, LocalDate endDate);
+
+        @Query("SELECT t.category as category, SUM(t.amount) as total " +
+                        "FROM Transaction t " +
+                        "WHERE t.userId = :userId " +
+                        "AND t.date BETWEEN :startDate AND :endDate " +
+                        "GROUP BY t.category")
+        List<Map<String, Object>> getTotalsByCategory(
+                        @Param("userId") String userId,
+                        @Param("startDate") LocalDate startDate,
+                        @Param("endDate") LocalDate endDate);
+
+        @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userId = :userId AND t.date BETWEEN :startDate AND :endDate")
+        BigDecimal getTotalSpending(
+                        @Param("userId") String userId,
+                        @Param("startDate") LocalDate startDate,
+                        @Param("endDate") LocalDate endDate);
+
+        @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.userId = :userId AND LOWER(t.category) = LOWER(:category) AND t.date BETWEEN :startDate AND :endDate")
+        BigDecimal getTotalSpendingByCategory(
+                        @Param("userId") String userId,
+                        @Param("category") String category,
+                        @Param("startDate") LocalDate startDate,
+                        @Param("endDate") LocalDate endDate);
+
+        java.util.Optional<Transaction> findByPlaidTransactionId(String plaidTransactionId);
 }
