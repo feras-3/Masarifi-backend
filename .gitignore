@@ -30,6 +30,7 @@ application-test.properties
 
 # Configuration files with sensitive data
 src/main/resources/application.properties
+.env
 
 !**/src/main/test/resources
 !**/src/main/resources

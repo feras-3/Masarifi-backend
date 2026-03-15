@@ -1,0 +1,14 @@
+target/
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.log
+*.md
+docker-compose.yml
+.dockerignore
