@@ -1,0 +1,42 @@
+services:
+  masarifi-backend:
+    build: .
+    container_name: masarifi-backend
+    ports:
+      - "8765:8765"
+    volumes:
+      # Persist the SQLite database file across container restarts
+      - masarifi-db:/app/data
+    environment:
+      # Server
+      SERVER_PORT: 8765
+
+      # Database — point SQLite to the persisted volume directory
+      SPRING_DATASOURCE_URL: jdbc:sqlite:/app/data/expense_tracker.db
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.sqlite.JDBC
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.community.dialect.SQLiteDialect
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-change-this-jwt-secret-in-production-min-256-bits}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+
+      # Encryption
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-change-this-encryption-key-in-production}
+
+      # Plaid
+      PLAID_CLIENT_ID: ${PLAID_CLIENT_ID:-your-plaid-client-id}
+      PLAID_SECRET: ${PLAID_SECRET:-your-plaid-secret}
+      PLAID_ENVIRONMENT: ${PLAID_ENVIRONMENT:-sandbox}
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8765/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  masarifi-db:
+    driver: local
