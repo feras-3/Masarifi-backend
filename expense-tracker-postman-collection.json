@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Expense Tracker API",
-    "description": "Complete API collection for testing the Expense Tracker backend",
+    "description": "Complete API collection for testing the Expense Tracker backend with category-based budget tracking. Supports both manual transactions and Plaid integration.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,6 +12,11 @@
     },
     {
       "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "publicToken",
       "value": "",
       "type": "string"
     }
@@ -116,13 +121,66 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 50.00,\n  \"category\": \"Food\",\n  \"description\": \"Grocery shopping\",\n  \"date\": \"2024-01-15\"\n}"
+              "raw": "{\n  \"amount\": 50.00,\n  \"category\": \"Food\",\n  \"description\": \"Grocery shopping\",\n  \"date\": \"2026-03-08\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/transactions",
               "host": ["{{baseUrl}}"],
               "path": ["api", "transactions"]
-            }
+            },
+            "description": "Creates a manual transaction. This will automatically update any Food budget for the current period. Budget recalculation happens automatically."
+          }
+        },
+        {
+          "name": "Create Transaction - Transportation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 45.00,\n  \"category\": \"Transportation\",\n  \"description\": \"Gas station\",\n  \"date\": \"2026-03-08\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Creates a Transportation transaction. Updates Transportation budget automatically."
+          }
+        },
+        {
+          "name": "Create Transaction - Entertainment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25.00,\n  \"category\": \"Entertainment\",\n  \"description\": \"Movie tickets\",\n  \"date\": \"2026-03-08\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Creates an Entertainment transaction. Updates Entertainment budget automatically."
           }
         },
         {
@@ -141,7 +199,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 75.00,\n  \"category\": \"Food\",\n  \"description\": \"Updated grocery shopping\",\n  \"date\": \"2024-01-15\"\n}"
+              "raw": "{\n  \"amount\": 75.00,\n  \"category\": \"Food\",\n  \"description\": \"Updated grocery shopping\",\n  \"date\": \"2026-03-08\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/transactions/{id}",
@@ -186,7 +244,8 @@
               "raw": "{{baseUrl}}/api/budgets/current",
               "host": ["{{baseUrl}}"],
               "path": ["api", "budgets", "current"]
-            }
+            },
+            "description": "Returns all budgets for the authenticated user with their current spending status. Each budget shows category-specific spending if a category is set, or total spending if no category is specified."
           }
         },
         {
@@ -222,13 +281,92 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 500.00,\n  \"period\": \"MONTHLY\"\n}"
+              "raw": "{\n  \"amount\": 500.00,\n  \"period\": \"MONTHLY\",\n  \"category\": \"Food\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/budgets",
               "host": ["{{baseUrl}}"],
               "path": ["api", "budgets"]
-            }
+            },
+            "description": "Creates a category-specific budget for Food. Only transactions with category='Food' will count toward this budget. Valid categories: Food, Transportation, Entertainment, Utilities, Healthcare, Shopping, Other."
+          }
+        },
+        {
+          "name": "Create General Budget (All Categories)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2000.00,\n  \"period\": \"MONTHLY\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets"]
+            },
+            "description": "Creates a general budget without a category. This budget tracks ALL spending across all categories. You can have both general and category-specific budgets simultaneously."
+          }
+        },
+        {
+          "name": "Create Budget - Transportation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 300.00,\n  \"period\": \"2026-03\",\n  \"category\": \"Transportation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets"]
+            },
+            "description": "Creates a Transportation budget. Plaid transactions like 'Gas', 'Parking', 'Ride Share' are automatically mapped to Transportation category."
+          }
+        },
+        {
+          "name": "Create Budget - Entertainment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 200.00,\n  \"period\": \"2026-03\",\n  \"category\": \"Entertainment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/budgets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "budgets"]
+            },
+            "description": "Creates an Entertainment budget. Plaid transactions like 'Movies', 'Music', 'Sporting Events' are automatically mapped to Entertainment category."
           }
         },
         {
@@ -280,6 +418,22 @@
       "item": [
         {
           "name": "Create Public Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"publicToken\", jsonData.publicToken);",
+                  "    pm.test(\"Public token created\", function () {",
+                  "        pm.expect(jsonData.publicToken).to.be.a('string');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -290,13 +444,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"institutionId\": \"ins_109508\"\n}"
+              "raw": "{\n  \"institution_id\": \"ins_109508\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/plaid/public-token",
               "host": ["{{baseUrl}}"],
               "path": ["api", "plaid", "public-token"]
-            }
+            },
+            "description": "Creates a public token for Plaid Link. Use institution_id 'ins_109508' for Chase (sandbox). No authentication required."
           }
         },
         {
@@ -315,13 +470,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"publicToken\": \"public-sandbox-xxxxx\"\n}"
+              "raw": "{\n  \"publicToken\": \"{{publicToken}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/plaid/exchange-token",
               "host": ["{{baseUrl}}"],
               "path": ["api", "plaid", "exchange-token"]
-            }
+            },
+            "description": "Exchanges the public token for an access token and links the bank account. Requires authentication."
           }
         },
         {
@@ -355,7 +511,8 @@
               "raw": "{{baseUrl}}/api/plaid/sync-transactions",
               "host": ["{{baseUrl}}"],
               "path": ["api", "plaid", "sync-transactions"]
-            }
+            },
+            "description": "Syncs transactions from linked Plaid accounts. Plaid categories are automatically mapped to app categories (Food, Transportation, Entertainment, etc.) and category-specific budgets are updated accordingly."
           }
         },
         {
